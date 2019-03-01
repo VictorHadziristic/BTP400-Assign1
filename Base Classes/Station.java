@@ -1,8 +1,7 @@
 package Assign1;
 
-enum stationStatus {OFF, WAITING, WORKING, HALTED};
-
 public class Station {
+    int ID;
     Task task;
     Job currentJob;
     stationStatus currentStatus;
@@ -24,6 +23,12 @@ public class Station {
         return statusString;
     }
 
+    public Station(int ID, Task task) {
+        this.ID = ID;
+        this.task = task;
+        this.currentStatus = stationStatus.WAITING;
+    }
+
     public Task getTask() {
         return task;
     }
@@ -36,4 +41,9 @@ public class Station {
         return currentStatus;
     }
 
+    public int getID() { return ID; }
+
+    public Order createOrder(){
+        return new Order(task.getTaskPart(), orderStatus.UNFULFILLED);
+    }
 }

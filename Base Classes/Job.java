@@ -1,10 +1,11 @@
 package Assign1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 enum carStatus {PreProduction, Production, PostProduction};
 
-public class Job {
+public class Job implements Serializable {
     ArrayList<Task> assemblyTasks;
     Car car;
     Task currentTask;

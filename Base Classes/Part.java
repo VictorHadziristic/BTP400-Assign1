@@ -1,17 +1,16 @@
 package Assign1;
 
-public class Part {
+import java.io.Serializable;
+
+public class Part implements Serializable {
     int id;
     String name;
-    int quantity;
 
     public String getName() { return name; }
-    public int getQuantity() { return quantity; }
     public int getId() { return id; }
 
-    public Part(int id, String name, int quantity) {
+    public Part(int id, String name) {
         this.id = id;
         this.name = name;
-        this.quantity = quantity;
     }
 }
