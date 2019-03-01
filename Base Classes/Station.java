@@ -1,10 +1,13 @@
 package Assign1;
 
+import java.net.Socket;
+
 public class Station {
     int ID;
     Task task;
     Job currentJob;
     stationStatus currentStatus;
+    Socket socket;
 
     public String reportStatus(){
         String statusString;
@@ -27,6 +30,18 @@ public class Station {
         this.ID = ID;
         this.task = task;
         this.currentStatus = stationStatus.WAITING;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    public void setCurrentJob(Job currentJob) {
+        this.currentJob = currentJob;
     }
 
     public Task getTask() {

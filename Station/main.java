@@ -2,6 +2,8 @@ import Assign1.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.Map;
 
 public class main {
 
@@ -9,7 +11,7 @@ public class main {
         boolean stationActive = true; Job currentJob = null; Station station = null;
         try {
 
-            Socket Socket = new Socket("127.0.0.1", 27000);
+            Socket Socket = new Socket("127.0.0.1", Integer.parseInt(args[0]));
 
             ObjectInputStream objectInputStream = new ObjectInputStream(Socket.getInputStream());
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(Socket.getOutputStream());
@@ -17,17 +19,17 @@ public class main {
             station = (Station) objectInputStream.readObject();
 
             if(station != null){
-                objectOutputStream.writeObject(new Message(MessageType.STATUS, new Status(station.getID(), stationStatus.WAITING), null, null));
+                objectOutputStream.writeObject(new Message(MessageType.STATUS, new Status(stationStatus.WAITING, statusBuilder(station,MessageType.STATUS)), null, null));
                 while(stationActive){
                     Message incomingJob = (Message) objectInputStream.readObject();
-                    currentJob = incomingJob.getJob();
+                    station.setCurrentJob(incomingJob.getJob());
                     if(currentJob != null && currentJob.getCurrentTask() == station.getTask()){
-                        objectOutputStream.writeObject(new Message(MessageType.ORDER, new Status(station.getID(), stationStatus.HALTED), new Order(station.getTask().getTaskPart(), orderStatus.UNFULFILLED), null));
+                        objectOutputStream.writeObject(new Message(MessageType.ORDER, new Status(stationStatus.HALTED, statusBuilder(station, MessageType.ORDER)), new Order(station.getTask().getTaskPart(), orderStatus.UNFULFILLED), null));
                         Message incomingOrder = (Message) objectInputStream.readObject();
                         if(incomingOrder.getOrder().getOrderStatus() == orderStatus.FULFILLED){
-                            objectOutputStream.writeObject(new Message(MessageType.STATUS, new Status(station.getID(), stationStatus.WORKING), null, null));
+                            objectOutputStream.writeObject(new Message(MessageType.STATUS, new Status(stationStatus.WORKING, statusBuilder(station, MessageType.STATUS)), null, null));
                             Thread.sleep(station.getTask().getTaskDuration());
-                            objectOutputStream.writeObject(new Message(MessageType.STATUS, new Status(station.getID(), stationStatus.WAITING), null, null));
+                            objectOutputStream.writeObject(new Message(MessageType.STATUS, new Status(stationStatus.WAITING, statusBuilder(station,MessageType.STATUS)), null, null));
                         }
                     }
                     // Possibly Implement wrong job sent to server
@@ -41,5 +43,21 @@ public class main {
             e.printStackTrace();
         }
 
+    }
+
+    public static String statusBuilder(Station station, MessageType messageType){
+        String status = null;
+        if(messageType.equals(MessageType.STATUS) && station.getCurrentStatus().equals(stationStatus.WAITING)){
+            status = "Station: " + station.getID() + " is waiting for a job";
+        }else if(messageType.equals(MessageType.STATUS) && station.getCurrentStatus().equals(stationStatus.WORKING)){
+            status = "Station: " + station.getID() + " is: " + station.getCurrentJob().getCurrentTask().getTaskDescription() + " for job: " +  station.getCurrentJob().getId();
+        }else if(messageType.equals(MessageType.ORDER)){
+            status =  "Station: " + station.getID() + " is requesting: ";
+            for(Map.Entry<Part, Integer> i: station.getTask().getTaskPart().entrySet()){
+                status += i.getKey().getName() + " x" + i.getValue().toString();
+            }
+            status += " for job: " +  station.getCurrentJob().getId();
+        }
+        return status;
     }
 }
